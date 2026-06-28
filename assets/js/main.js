@@ -61,7 +61,7 @@ window.CJ = {
 
     host.innerHTML =
       '<nav class="fixed top-0 left-0 right-0 z-50 border-b" ' +
-      'style="background:rgba(247,246,243,0);border-color:transparent;transform:translateY(-100%);opacity:0;">' +
+      'style="background:rgba(12,13,16,0);border-color:transparent;transform:translateY(-100%);opacity:0;">' +
       '<div class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 h-[68px] flex items-center justify-between">' +
       '<a href="index.html" class="font-display text-xl tracking-tight" style="font-weight:400;">' +
       CJ.name +
@@ -111,8 +111,8 @@ window.CJ = {
       var solid = y > 80;
       if (solid !== lastSolid) {
         navEl.style.background = solid
-          ? "rgba(247,246,243,0.85)"
-          : "rgba(247,246,243,0)";
+          ? "rgba(12,13,16,0.82)"
+          : "rgba(12,13,16,0)";
         navEl.style.backdropFilter = solid ? "blur(12px)" : "none";
         navEl.style.webkitBackdropFilter = solid ? "blur(12px)" : "none";
         navEl.style.borderColor = solid ? "var(--line)" : "transparent";
