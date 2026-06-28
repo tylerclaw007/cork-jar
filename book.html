@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Book a shoot | Cork Jar</title>
+    <meta
+      name="description"
+      content="Book Tyler Law for portrait, editorial, landscape or travel photography. Send an enquiry and get a reply within 24 hours."
+    />
+    <link rel="canonical" href="https://corkjar.studio/book.html" />
+    <meta property="og:title" content="Book a shoot | Cork Jar" />
+    <meta property="og:description" content="Commission Tyler Law for your next shoot." />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230a0a0a'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='32' fill='%23f7f6f3' text-anchor='middle'%3ECJ%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              paper: "#f7f6f3",
+              paper2: "#efece6",
+              ink: "#0a0a0a",
+              ink2: "#2b2a27",
+              muted: "#75736c",
+              accent: "#b4532a",
+              night: "#0b0b0c",
+            },
+            fontFamily: {
+              display: ["Fraunces", "Georgia", "serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="assets/css/site.css" />
+  </head>
+  <body class="font-sans">
+    <div class="scroll-progress" aria-hidden="true"></div>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[80] focus:bg-ink focus:text-paper focus:px-4 focus:py-2"
+      >Skip to content</a
+    >
+    <div id="site-header"></div>
+
+    <main id="main" class="pt-28">
+      <section class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+        <p class="eyebrow reveal">Booking</p>
+        <h1 class="display-lg mt-3 reveal reveal-1">Book a shoot</h1>
+        <p class="lede mt-6 max-w-xl reveal reveal-2">
+          Tell me about the project. Portraits, brand work, editorial, an event,
+          or a landscape commission, I read every enquiry and reply within 24
+          hours.
+        </p>
+      </section>
+
+      <section class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-16">
+        <div class="grid lg:grid-cols-12 gap-12 lg:gap-16">
+          <!-- form -->
+          <div class="lg:col-span-7 reveal">
+            <div id="form-status" class="mb-6"></div>
+            <form id="booking-form" novalidate>
+              <input
+                type="text"
+                name="_honey"
+                style="display: none"
+                tabindex="-1"
+                autocomplete="off"
+                aria-hidden="true"
+              />
+              <div class="grid sm:grid-cols-2 gap-8">
+                <div>
+                  <label class="field-label" for="name">Your name</label>
+                  <input class="field mt-2" id="name" name="name" required placeholder="Jane Doe" />
+                </div>
+                <div>
+                  <label class="field-label" for="email">Email</label>
+                  <input
+                    class="field mt-2"
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="you@email.com"
+                    autocomplete="email"
+                  />
+                </div>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-8 mt-8">
+                <div>
+                  <label class="field-label" for="type">Type of shoot</label>
+                  <select class="field mt-2" id="type" name="type">
+                    <option>Portrait & lifestyle</option>
+                    <option>Editorial & street</option>
+                    <option>Landscape & travel</option>
+                    <option>Event</option>
+                    <option>Other / not sure</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label" for="date">Ideal date</label>
+                  <input class="field mt-2" id="date" name="date" type="date" />
+                </div>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-8 mt-8">
+                <div>
+                  <label class="field-label" for="location">Location</label>
+                  <input
+                    class="field mt-2"
+                    id="location"
+                    name="location"
+                    placeholder="City, or remote"
+                  />
+                </div>
+                <div>
+                  <label class="field-label" for="budget">Budget (optional)</label>
+                  <input
+                    class="field mt-2"
+                    id="budget"
+                    name="budget"
+                    placeholder="Helps me tailor the quote"
+                  />
+                </div>
+              </div>
+
+              <div class="mt-8">
+                <label class="field-label" for="message">The project</label>
+                <textarea
+                  class="field mt-2"
+                  id="message"
+                  name="message"
+                  rows="4"
+                  required
+                  placeholder="What are we making? Mood, references, anything that helps."
+                ></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-solid mt-10">
+                Send enquiry <span class="arrow">&rarr;</span>
+              </button>
+              <p class="muted text-xs mt-4">
+                Your details are emailed straight to me and never shared.
+              </p>
+            </form>
+          </div>
+
+          <!-- aside -->
+          <aside class="lg:col-span-5 reveal reveal-1">
+            <div id="calendly-slot" class="mb-8"></div>
+
+            <p class="eyebrow mb-4">What to expect</p>
+            <ol class="space-y-5">
+              <li class="flex gap-4">
+                <span class="font-display accent" style="font-size: 1.25rem">01</span>
+                <p class="lede" style="font-size: 1rem">
+                  Send the form. I reply within a day with availability and a
+                  rough quote.
+                </p>
+              </li>
+              <li class="flex gap-4">
+                <span class="font-display accent" style="font-size: 1.25rem">02</span>
+                <p class="lede" style="font-size: 1rem">
+                  We lock the date, location, and a shot direction together.
+                </p>
+              </li>
+              <li class="flex gap-4">
+                <span class="font-display accent" style="font-size: 1.25rem">03</span>
+                <p class="lede" style="font-size: 1rem">
+                  We shoot. You get a private gallery of finished, graded images.
+                </p>
+              </li>
+            </ol>
+
+            <div class="hr my-8"></div>
+            <p class="eyebrow mb-3">Prefer email?</p>
+            <a class="link-underline" href="mailto:tylerclaw007@gmail.com"
+              >tylerclaw007@gmail.com</a
+            >
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+    <script src="assets/js/gallery-data.js"></script>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>

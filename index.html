@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cork Jar: Photography by Tyler Law</title>
+    <meta
+      name="description"
+      content="Cork Jar is the editorial, landscape and portrait photography of Tyler Law. Book a shoot, browse the work, and collect prints."
+    />
+    <link rel="canonical" href="https://corkjar.studio/" />
+    <meta property="og:title" content="Cork Jar: Photography by Tyler Law" />
+    <meta
+      property="og:description"
+      content="Editorial, landscape and portrait photography. Light, preserved."
+    />
+    <meta property="og:type" content="website" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230a0a0a'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='32' fill='%23f7f6f3' text-anchor='middle'%3ECJ%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              paper: "#f7f6f3",
+              paper2: "#efece6",
+              ink: "#0a0a0a",
+              ink2: "#2b2a27",
+              muted: "#75736c",
+              accent: "#b4532a",
+              night: "#0b0b0c",
+            },
+            fontFamily: {
+              display: ["Fraunces", "Georgia", "serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="assets/css/site.css" />
+  </head>
+  <body class="font-sans">
+    <div class="scroll-progress" aria-hidden="true"></div>
+
+    <div class="loader" id="loader" aria-hidden="true">
+      <div class="mark">
+        <span style="animation-delay: 0.05s">Cork</span>&nbsp;<span
+          style="animation-delay: 0.18s"
+          >Jar</span
+        >
+      </div>
+    </div>
+
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[80] focus:bg-ink focus:text-paper focus:px-4 focus:py-2"
+      >Skip to content</a
+    >
+
+    <div id="site-header"></div>
+
+    <main id="main">
+      <!-- ───────────────────────────── hero -->
+      <section
+        class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 min-h-[92vh] flex flex-col justify-center pt-28 pb-16"
+      >
+        <p class="eyebrow reveal">Photography by Tyler Law</p>
+        <h1 class="display-xl mt-5 reveal reveal-1">
+          Cork&nbsp;Jar
+        </h1>
+        <div
+          class="mt-8 flex flex-col md:flex-row md:items-end md:justify-between gap-8 reveal reveal-2"
+        >
+          <p class="lede max-w-xl">
+            Light, preserved. Editorial, landscape and portrait work made to be
+            kept, not scrolled past. Based wherever the next frame is.
+          </p>
+          <div class="flex gap-3 shrink-0">
+            <a class="btn btn-solid" href="work.html"
+              >View the work <span class="arrow">&rarr;</span></a
+            >
+            <a class="btn btn-ghost" href="book.html">Book a shoot</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────────────────────── full-bleed feature -->
+      <section class="px-5 sm:px-8 lg:px-12">
+        <div class="max-w-[1400px] mx-auto">
+          <div class="curtain row-wide overflow-hidden" style="background: var(--paper-2)">
+            <img
+              src="assets/photos/street-editorial/main-street-dusk.jpg"
+              alt="Empty main street at dusk, photograph by Tyler Law"
+              style="width: 100%; height: 100%; object-fit: cover"
+              loading="eager"
+            />
+          </div>
+          <div class="flex justify-between items-baseline mt-4 reveal">
+            <span class="cap-meta" style="color: var(--muted)">Selected frame, 2025</span>
+            <a class="nav-link" href="work.html">All work</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────────────────────── featured grid -->
+      <section class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-24 md:py-32">
+        <div class="flex items-end justify-between mb-12">
+          <div>
+            <p class="eyebrow reveal">Selected work</p>
+            <h2 class="display-lg mt-3 reveal reveal-1">A short edit</h2>
+          </div>
+          <a class="nav-link hidden sm:block reveal" href="work.html">See everything &rarr;</a>
+        </div>
+        <div class="gallery" id="featured-grid"></div>
+      </section>
+
+      <!-- ───────────────────────────── statement -->
+      <section class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-12">
+        <div class="grid md:grid-cols-12 gap-10 items-start">
+          <p class="eyebrow md:col-span-3 reveal">The approach</p>
+          <div class="md:col-span-9">
+            <p class="display-md reveal reveal-1">
+              Three cameras, one way of seeing. I shoot on a Sony a6300, a Canon
+              Rebel T7, and a Nikon&nbsp;1 in an underwater housing. The gear is
+              just a means. The work is about light, patience, and showing up
+              when the moment is honest.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────────────────────── services list -->
+      <section class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-24 md:py-32">
+        <p class="eyebrow mb-10 reveal">What I do</p>
+        <div class="hr"></div>
+        <a
+          href="book.html"
+          class="group block py-8 border-b reveal"
+          style="border-color: var(--line)"
+        >
+          <div class="flex items-center justify-between gap-6">
+            <h3 class="display-md">Portrait & lifestyle</h3>
+            <span class="muted hidden sm:block">Sessions, headshots, brand stories</span>
+            <span class="arrow text-2xl">&rarr;</span>
+          </div>
+        </a>
+        <a
+          href="book.html"
+          class="group block py-8 border-b reveal"
+          style="border-color: var(--line)"
+        >
+          <div class="flex items-center justify-between gap-6">
+            <h3 class="display-md">Editorial & street</h3>
+            <span class="muted hidden sm:block">Documentary, fashion, fine art</span>
+            <span class="arrow text-2xl">&rarr;</span>
+          </div>
+        </a>
+        <a
+          href="book.html"
+          class="group block py-8 border-b reveal"
+          style="border-color: var(--line)"
+        >
+          <div class="flex items-center justify-between gap-6">
+            <h3 class="display-md">Landscape & travel</h3>
+            <span class="muted hidden sm:block">Commissions and licensing</span>
+            <span class="arrow text-2xl">&rarr;</span>
+          </div>
+        </a>
+        <a
+          href="prints.html"
+          class="group block py-8 border-b reveal"
+          style="border-color: var(--line)"
+        >
+          <div class="flex items-center justify-between gap-6">
+            <h3 class="display-md">Prints & color grades</h3>
+            <span class="muted hidden sm:block">Collect a print, grade like me</span>
+            <span class="arrow text-2xl">&rarr;</span>
+          </div>
+        </a>
+      </section>
+
+      <!-- ───────────────────────────── marquee -->
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee-track">
+          <span>Editorial <span class="dot">&bull;</span> Landscape <span class="dot">&bull;</span> Portrait <span class="dot">&bull;</span> Street <span class="dot">&bull;</span> Travel <span class="dot">&bull;</span>&nbsp;</span>
+          <span>Editorial <span class="dot">&bull;</span> Landscape <span class="dot">&bull;</span> Portrait <span class="dot">&bull;</span> Street <span class="dot">&bull;</span> Travel <span class="dot">&bull;</span>&nbsp;</span>
+        </div>
+      </div>
+
+      <!-- ───────────────────────────── CTA -->
+      <section class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-28 md:py-40 text-center">
+        <p class="eyebrow reveal">Available for commissions</p>
+        <h2 class="display-lg mt-5 mx-auto max-w-3xl reveal reveal-1">
+          Let's make something worth keeping.
+        </h2>
+        <div class="mt-10 flex justify-center gap-3 reveal reveal-2">
+          <a class="btn btn-solid" href="book.html"
+            >Book a shoot <span class="arrow">&rarr;</span></a
+          >
+          <a class="btn btn-ghost" href="about.html">About Tyler</a>
+        </div>
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+
+    <script src="assets/js/gallery-data.js"></script>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>

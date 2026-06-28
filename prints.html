@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prints | Cork Jar</title>
+    <meta
+      name="description"
+      content="Collect a fine-art print by Tyler Law. Selected frames available by request, printed to order."
+    />
+    <link rel="canonical" href="https://corkjar.studio/prints.html" />
+    <meta property="og:title" content="Prints | Cork Jar" />
+    <meta property="og:description" content="Fine-art prints by Tyler Law, printed to order." />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230a0a0a'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='32' fill='%23f7f6f3' text-anchor='middle'%3ECJ%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              paper: "#f7f6f3",
+              paper2: "#efece6",
+              ink: "#0a0a0a",
+              ink2: "#2b2a27",
+              muted: "#75736c",
+              accent: "#b4532a",
+              night: "#0b0b0c",
+            },
+            fontFamily: {
+              display: ["Fraunces", "Georgia", "serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="assets/css/site.css" />
+  </head>
+  <body class="font-sans">
+    <div class="scroll-progress" aria-hidden="true"></div>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[80] focus:bg-ink focus:text-paper focus:px-4 focus:py-2"
+      >Skip to content</a
+    >
+    <div id="site-header"></div>
+
+    <main id="main" class="pt-28">
+      <section class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+        <p class="eyebrow reveal">The print room</p>
+        <h1 class="display-lg mt-3 reveal reveal-1">Prints</h1>
+        <p class="lede mt-6 max-w-2xl reveal reveal-2">
+          A rotating selection of frames available as prints, made to order on
+          archival paper. The shop is opening soon. For now, if a frame speaks to
+          you, send an enquiry and I will sort sizing, paper, and pricing with
+          you directly.
+        </p>
+        <div
+          class="inline-flex items-center gap-2 mt-6 reveal reveal-3"
+          style="
+            font-size: 0.72rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--accent);
+          "
+        >
+          <span
+            style="
+              width: 7px;
+              height: 7px;
+              border-radius: 50%;
+              background: var(--accent);
+              display: inline-block;
+            "
+          ></span>
+          Print shop opening soon
+        </div>
+      </section>
+
+      <section class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-16">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-10" id="prints-grid"></div>
+      </section>
+
+      <section class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pb-12">
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="reveal">
+            <p class="eyebrow mb-3">Archival quality</p>
+            <p class="lede" style="font-size: 1rem">
+              Printed on museum-grade matte and lustre stock built to hold color
+              for decades.
+            </p>
+          </div>
+          <div class="reveal reveal-1">
+            <p class="eyebrow mb-3">Made to order</p>
+            <p class="lede" style="font-size: 1rem">
+              Sizes from A4 to large format. Editions kept small so each print
+              stays special.
+            </p>
+          </div>
+          <div class="reveal reveal-2">
+            <p class="eyebrow mb-3">Want a specific frame?</p>
+            <p class="lede" style="font-size: 1rem">
+              Anything in the
+              <a class="link-underline" href="work.html">portfolio</a> can be
+              printed. Just ask.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-24 text-center">
+        <h2 class="display-md mx-auto max-w-2xl reveal">
+          Found the one for your wall?
+        </h2>
+        <a class="btn btn-solid mt-8 reveal reveal-1" href="mailto:tylerclaw007@gmail.com?subject=Print%20enquiry"
+          >Enquire about a print <span class="arrow">&rarr;</span></a
+        >
+      </section>
+    </main>
+
+    <div id="site-footer"></div>
+    <script src="assets/js/gallery-data.js"></script>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>
