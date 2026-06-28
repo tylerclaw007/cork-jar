@@ -1,7 +1,8 @@
-/* Cork Jar: 3D experiences (Three.js, lazy-loaded from CDN)
-   - initCamera3D(): an interactive stylized camera on the Gear page
-   - 3D gallery: a walk-through corridor of the real photos on the Work page
-   Custom lightweight controls, no extra libs. Degrades gracefully. */
+/* Cork Jar: 3D photo gallery (Three.js, lazy-loaded from CDN).
+   A bright, minimal museum room. The camera glides from artwork to
+   artwork around the room. Photos use unlit materials so they are
+   always perfectly visible (no dark squares), with a light placeholder
+   and an error fallback. Custom controls, no extra libraries. */
 
 (function () {
   "use strict";
@@ -36,395 +37,297 @@
     return t;
   }
 
-  /* ----------------------------------------------- stylized 3D camera */
-  function buildCamera(THREE) {
-    var g = new THREE.Group();
-    var metal = function (c, m, r) {
-      return new THREE.MeshStandardMaterial({
-        color: c,
-        metalness: m == null ? 0.6 : m,
-        roughness: r == null ? 0.45 : r,
-      });
-    };
-    var bodyMat = metal(0x2a2d33, 0.55, 0.5);
-    var darkMat = metal(0x191b1f, 0.6, 0.45);
-    var amberMat = metal(0xd6a35c, 0.9, 0.3);
+  var built = false,
+    state = null;
 
-    var body = new THREE.Mesh(new THREE.BoxGeometry(2.1, 1.35, 0.72), bodyMat);
-    g.add(body);
-    var top = new THREE.Mesh(new THREE.BoxGeometry(2.12, 0.2, 0.74), darkMat);
-    top.position.y = 0.77;
-    g.add(top);
-    var grip = new THREE.Mesh(new THREE.BoxGeometry(0.42, 1.36, 0.78), darkMat);
-    grip.position.x = 1.02;
-    g.add(grip);
-    var hump = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.34, 0.5), darkMat);
-    hump.position.set(-0.45, 0.95, 0);
-    g.add(hump);
-    var shoe = new THREE.Mesh(
-      new THREE.BoxGeometry(0.28, 0.08, 0.3),
-      metal(0x33363c, 0.5, 0.5),
-    );
-    shoe.position.set(-0.45, 1.16, 0);
-    g.add(shoe);
-    var shutter = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.1, 0.1, 0.08, 24),
-      amberMat,
-    );
-    shutter.position.set(0.62, 0.9, 0.18);
-    g.add(shutter);
-    var dial = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.22, 0.22, 0.14, 28),
-      metal(0x3a3d44, 0.6, 0.4),
-    );
-    dial.position.set(0.3, 0.9, -0.18);
-    g.add(dial);
-
-    var lens = new THREE.Group();
-    var barrel = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.52, 0.56, 0.95, 56),
-      metal(0x17191d, 0.65, 0.4),
-    );
-    barrel.rotation.x = Math.PI / 2;
-    barrel.position.z = 0.78;
-    lens.add(barrel);
-    var ring1 = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.575, 0.575, 0.1, 56),
-      metal(0x101216, 0.5, 0.6),
-    );
-    ring1.rotation.x = Math.PI / 2;
-    ring1.position.z = 0.7;
-    lens.add(ring1);
-    var accentRing = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.585, 0.585, 0.05, 56),
-      amberMat,
-    );
-    accentRing.rotation.x = Math.PI / 2;
-    accentRing.position.z = 1.06;
-    lens.add(accentRing);
-    var glass = new THREE.Mesh(
-      new THREE.CircleGeometry(0.46, 48),
-      new THREE.MeshStandardMaterial({
-        color: 0x0a1016,
-        metalness: 0.9,
-        roughness: 0.08,
-        emissive: 0x16323a,
-        emissiveIntensity: 0.5,
-      }),
-    );
-    glass.position.z = 1.27;
-    lens.add(glass);
-    g.add(lens);
-
-    g.rotation.y = -0.5;
-    g.rotation.x = 0.1;
-    return g;
-  }
-
-  function initCamera3D(container) {
-    loadThree()
-      .then(function (THREE) {
-        var loading = container.querySelector(".three-loading");
-        if (loading) loading.remove();
-        var w = container.clientWidth,
-          h = container.clientHeight;
-        var scene = new THREE.Scene();
-        scene.background = gradientTexture(THREE, [
-          [0, "#1b3a42"],
-          [0.55, "#23262c"],
-          [1, "#3a2a1e"],
-        ]);
-        var camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 100);
-        camera.position.set(0, 0.4, 6.4);
-        var renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-        renderer.setSize(w, h);
-        renderer.outputColorSpace = THREE.SRGBColorSpace;
-        container.appendChild(renderer.domElement);
-
-        scene.add(new THREE.AmbientLight(0x4a4f58, 0.8));
-        var key = new THREE.DirectionalLight(0xffffff, 1.2);
-        key.position.set(3, 5, 4);
-        scene.add(key);
-        var rim = new THREE.DirectionalLight(0x5aa6b0, 1.0);
-        rim.position.set(-4, 2, -3);
-        scene.add(rim);
-        var fill = new THREE.PointLight(0xd6a35c, 0.6, 30);
-        fill.position.set(2, -2, 3);
-        scene.add(fill);
-
-        var cam = buildCamera(THREE);
-        scene.add(cam);
-
-        var dragging = false,
-          px = 0,
-          py = 0,
-          tY = cam.rotation.y,
-          tX = cam.rotation.x,
-          idle = 0;
-        function down(x, y) {
-          dragging = true;
-          px = x;
-          py = y;
-          idle = 0;
-        }
-        function move(x, y) {
-          if (!dragging) return;
-          tY += (x - px) * 0.01;
-          tX += (y - py) * 0.01;
-          tX = Math.max(-0.8, Math.min(0.8, tX));
-          px = x;
-          py = y;
-          idle = 0;
-        }
-        function up() {
-          dragging = false;
-        }
-        renderer.domElement.addEventListener("mousedown", function (e) {
-          down(e.clientX, e.clientY);
-        });
-        window.addEventListener("mousemove", function (e) {
-          move(e.clientX, e.clientY);
-        });
-        window.addEventListener("mouseup", up);
-        renderer.domElement.addEventListener(
-          "touchstart",
-          function (e) {
-            down(e.touches[0].clientX, e.touches[0].clientY);
-          },
-          { passive: true },
-        );
-        renderer.domElement.addEventListener(
-          "touchmove",
-          function (e) {
-            move(e.touches[0].clientX, e.touches[0].clientY);
-          },
-          { passive: true },
-        );
-        window.addEventListener("touchend", up);
-
-        window.addEventListener("resize", function () {
-          var W = container.clientWidth,
-            H = container.clientHeight;
-          camera.aspect = W / H;
-          camera.updateProjectionMatrix();
-          renderer.setSize(W, H);
-        });
-
-        function loop() {
-          requestAnimationFrame(loop);
-          idle++;
-          if (!dragging && idle > 90 && !reduce) tY += 0.0035;
-          cam.rotation.y += (tY - cam.rotation.y) * 0.08;
-          cam.rotation.x += (tX - cam.rotation.x) * 0.08;
-          renderer.render(scene, camera);
-        }
-        loop();
-      })
-      .catch(function () {
-        var l = container.querySelector(".three-loading");
-        if (l) l.textContent = "3D view unavailable";
-      });
-  }
-
-  /* ------------------------------------- walk-through 3D photo gallery */
-  var g3dBuilt = false,
-    g3dState = null;
   function buildGallery3D(THREE, items) {
     var overlay = document.createElement("div");
     overlay.className = "gallery3d";
     overlay.innerHTML =
       '<button class="g3d-exit" type="button">Exit</button>' +
-      '<div class="g3d-hint">Scroll to walk forward  &middot;  drag to look  &middot;  click a photo to enlarge  &middot;  Esc to exit</div>';
+      '<div class="g3d-hint">Scroll or drag to walk the room  &middot;  click a photo to enlarge  &middot;  Esc to exit</div>';
     document.body.appendChild(overlay);
 
     var scene = new THREE.Scene();
     scene.background = gradientTexture(THREE, [
-      [0, "#16323a"],
-      [0.5, "#262a30"],
-      [1, "#3a2a1e"],
+      [0, "#f4f2ec"],
+      [1, "#e4e1d8"],
     ]);
-    scene.fog = new THREE.FogExp2(0x20242a, 0.018);
 
-    var camera = new THREE.PerspectiveCamera(
-      68,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      200,
-    );
     var renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     overlay.insertBefore(renderer.domElement, overlay.firstChild);
 
-    var maxAniso = renderer.capabilities.getMaxAnisotropy();
-    var loader = new THREE.TextureLoader();
-    var SP = 6.2; // spacing along the corridor
-    var XW = 4.3; // wall offset
-    var planes = [];
+    var camera = new THREE.PerspectiveCamera(
+      60,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      200,
+    );
+
+    // ---- bright, even museum lighting ----
+    scene.add(new THREE.HemisphereLight(0xfff7ec, 0xcfcdc8, 1.05));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+    var dir = new THREE.DirectionalLight(0xffffff, 0.5);
+    dir.position.set(0, 8, 3);
+    scene.add(dir);
+
+    // ---- room geometry from the photo count ----
     var n = items.length;
+    var H = 6; // wall height
+    var approxSpacing = 4.3;
+    var P = n * approxSpacing; // perimeter target
+    var halfL = (P * 0.3) / 1; // longer sides
+    var halfW = P * 0.2;
+    halfL = Math.max(halfL, 8);
+    halfW = Math.max(halfW, 6);
+    var W2 = 2 * halfW,
+      L2 = 2 * halfL;
+    var perim = 2 * (W2 + L2);
+    var spacing = perim / n;
+    var viewDist = 4.7;
 
-    items.forEach(function (it, i) {
-      var left = i % 2 === 0;
-      var x = left ? -XW : XW;
-      var z = -i * SP;
-      var tex = loader.load(it.src, function (t) {
-        t.anisotropy = maxAniso;
-        var ar = t.image.width / t.image.height;
-        var hh = 3.4,
-          ww = hh * ar;
-        mesh.scale.set(ww, hh, 1);
-        frame.scale.set(ww + 0.22, hh + 0.22, 1);
-      });
-      tex.colorSpace = THREE.SRGBColorSpace;
-      var frame = new THREE.Mesh(
-        new THREE.PlaneGeometry(1, 1),
-        new THREE.MeshBasicMaterial({ color: 0x07080a }),
-      );
-      var mesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(1, 1),
-        new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }),
-      );
-      var ry = left ? Math.PI / 2 - 0.32 : -Math.PI / 2 + 0.32;
-      frame.position.set(x, 0, z);
-      mesh.position.set(x + (left ? 0.02 : -0.02), 0, z);
-      frame.rotation.y = ry;
-      mesh.rotation.y = ry;
-      mesh.userData.index = i;
-      scene.add(frame);
-      scene.add(mesh);
-      planes.push(mesh);
+    // perimeter walker -> wall point + inward normal
+    var edges = [
+      { x: -halfW, z: -halfL, dx: 1, dz: 0, nx: 0, nz: 1, len: W2 }, // top
+      { x: halfW, z: -halfL, dx: 0, dz: 1, nx: -1, nz: 0, len: L2 }, // right
+      { x: halfW, z: halfL, dx: -1, dz: 0, nx: 0, nz: -1, len: W2 }, // bottom
+      { x: -halfW, z: halfL, dx: 0, dz: -1, nx: 1, nz: 0, len: L2 }, // left
+    ];
+    function pointAt(d) {
+      var dd = ((d % perim) + perim) % perim;
+      for (var i = 0; i < edges.length; i++) {
+        var e = edges[i];
+        if (dd <= e.len) {
+          return {
+            x: e.x + e.dx * dd,
+            z: e.z + e.dz * dd,
+            nx: e.nx,
+            nz: e.nz,
+          };
+        }
+        dd -= e.len;
+      }
+      return { x: 0, z: 0, nx: 0, nz: 1 };
+    }
 
-      // little spotlight glow above each frame for gallery ambiance
-      var glow = new THREE.Mesh(
-        new THREE.CircleGeometry(0.5, 24),
-        new THREE.MeshBasicMaterial({
-          color: left ? 0x5aa6b0 : 0xd6a35c,
-          transparent: true,
-          opacity: 0.16,
-        }),
-      );
-      glow.position.set(x, 2.5, z);
-      glow.rotation.x = -Math.PI / 2.2;
-      scene.add(glow);
+    // ---- walls / floor / ceiling ----
+    var wallMat = new THREE.MeshStandardMaterial({
+      color: 0xeae7e0,
+      roughness: 0.95,
+      metalness: 0,
     });
-
-    var corridorLen = (n - 1) * SP;
-
-    // floor + ceiling + accent runners for depth
+    function wall(w, cx, cz, ry) {
+      var m = new THREE.Mesh(new THREE.PlaneGeometry(w, H), wallMat);
+      m.position.set(cx, 0, cz);
+      m.rotation.y = ry;
+      scene.add(m);
+    }
+    wall(W2, 0, -halfL, 0); // top faces +z
+    wall(W2, 0, halfL, Math.PI); // bottom faces -z
+    wall(L2, halfW, 0, -Math.PI / 2); // right faces -x
+    wall(L2, -halfW, 0, Math.PI / 2); // left faces +x
     var floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(40, corridorLen + 40),
-      new THREE.MeshBasicMaterial({ color: 0x14161a }),
+      new THREE.PlaneGeometry(W2 + 2, L2 + 2),
+      new THREE.MeshStandardMaterial({ color: 0xd9d7d1, roughness: 1 }),
     );
     floor.rotation.x = -Math.PI / 2;
-    floor.position.set(0, -2.6, -corridorLen / 2);
+    floor.position.y = -H / 2;
     scene.add(floor);
     var ceil = new THREE.Mesh(
-      new THREE.PlaneGeometry(40, corridorLen + 40),
-      new THREE.MeshBasicMaterial({ color: 0x1b1e23 }),
+      new THREE.PlaneGeometry(W2 + 2, L2 + 2),
+      new THREE.MeshStandardMaterial({ color: 0xf4f2ec, roughness: 1 }),
     );
     ceil.rotation.x = Math.PI / 2;
-    ceil.position.set(0, 3.4, -corridorLen / 2);
+    ceil.position.y = H / 2;
     scene.add(ceil);
-    [-XW - 0.4, XW + 0.4].forEach(function (rx, k) {
-      var runner = new THREE.Mesh(
-        new THREE.BoxGeometry(0.06, 0.06, corridorLen + 30),
-        new THREE.MeshBasicMaterial({ color: k === 0 ? 0x5aa6b0 : 0xd6a35c }),
+
+    // ---- photos as framed, unlit artworks ----
+    var maxAniso = renderer.capabilities.getMaxAnisotropy();
+    var loader = new THREE.TextureLoader();
+    var photos = [];
+    var stations = [];
+    var MAXH = 2.6;
+
+    items.forEach(function (it, i) {
+      var d = (i + 0.5) * spacing;
+      var p = pointAt(d);
+      var ry = Math.atan2(p.nx, p.nz);
+      stations.push({
+        cam: new THREE.Vector3(p.x + p.nx * viewDist, 0, p.z + p.nz * viewDist),
+        look: new THREE.Vector3(p.x, 0, p.z),
+      });
+
+      // soft warm spotlight wash on the wall behind the piece
+      var wash = new THREE.Mesh(
+        new THREE.PlaneGeometry(MAXH * 1.9, MAXH * 1.9),
+        new THREE.MeshBasicMaterial({
+          color: 0xfff3df,
+          transparent: true,
+          opacity: 0.5,
+        }),
       );
-      runner.position.set(rx, -2.55, -corridorLen / 2);
-      scene.add(runner);
+      wash.position.set(p.x + p.nx * 0.01, 0.2, p.z + p.nz * 0.01);
+      wash.rotation.y = ry;
+      scene.add(wash);
+
+      var frame = new THREE.Mesh(
+        new THREE.PlaneGeometry(1, 1),
+        new THREE.MeshBasicMaterial({ color: 0x1b1b1d }),
+      );
+      var mat = new THREE.Mesh(
+        new THREE.PlaneGeometry(1, 1),
+        new THREE.MeshBasicMaterial({ color: 0xfbfaf6 }),
+      );
+      // photo: light placeholder until the texture loads (never black)
+      var photoMat = new THREE.MeshBasicMaterial({
+        color: 0xcfccc4,
+        toneMapped: false,
+      });
+      var photo = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), photoMat);
+      photo.userData.index = i;
+      photo.userData.mult = 1;
+      photo.userData.target = 1;
+
+      function place(w, h) {
+        photo.userData.w = w;
+        photo.userData.h = h;
+        photo.scale.set(w, h, 1);
+        mat.scale.set(w + 0.18, h + 0.18, 1);
+        frame.scale.set(w + 0.34, h + 0.34, 1);
+        [photo, mat, frame].forEach(function (o) {
+          o.rotation.y = ry;
+        });
+        frame.position.set(p.x + p.nx * 0.03, 0, p.z + p.nz * 0.03);
+        mat.position.set(p.x + p.nx * 0.05, 0, p.z + p.nz * 0.05);
+        photo.position.set(p.x + p.nx * 0.07, 0, p.z + p.nz * 0.07);
+      }
+      place(MAXH * 1.4, MAXH); // sensible default before load
+
+      loader.load(
+        it.src,
+        function (t) {
+          t.colorSpace = THREE.SRGBColorSpace;
+          t.anisotropy = maxAniso;
+          photoMat.map = t;
+          photoMat.color.set(0xffffff);
+          photoMat.needsUpdate = true;
+          var ar = t.image.width / t.image.height;
+          var h = MAXH,
+            w = h * ar;
+          if (w > spacing * 0.82) {
+            w = spacing * 0.82;
+            h = w / ar;
+          }
+          place(w, h);
+        },
+        undefined,
+        function () {
+          photoMat.color.set(0x9a978f); // graceful fallback block
+        },
+      );
+
+      scene.add(frame);
+      scene.add(mat);
+      scene.add(photo);
+      photos.push(photo);
     });
 
-    var START_Z = 5;
-    camera.position.set(0, 0, START_Z);
-    var targetZ = START_Z,
-      yaw = 0,
-      tYaw = 0;
-    var minZ = -corridorLen - 4,
-      maxZ = START_Z;
+    // ---- navigation: glide between stations ----
+    var pos = 0,
+      tpos = 0;
+    function setCam() {
+      var base = Math.floor(pos);
+      var f = pos - base;
+      var a = stations[((base % n) + n) % n];
+      var b = stations[(((base + 1) % n) + n) % n];
+      camera.position.lerpVectors(a.cam, b.cam, f);
+      var look = new THREE.Vector3().lerpVectors(a.look, b.look, f);
+      camera.lookAt(look);
+    }
+    setCam();
 
-    // wheel / swipe = walk forward and back
     overlay.addEventListener(
       "wheel",
       function (e) {
         e.preventDefault();
-        targetZ -= e.deltaY * 0.02;
-        targetZ = Math.max(minZ, Math.min(maxZ, targetZ));
+        tpos += e.deltaY * 0.0024;
       },
       { passive: false },
     );
 
     var dragging = false,
-      px = 0,
-      py = 0,
-      ty = 0;
+      downX = 0,
+      downY = 0,
+      lastX = 0,
+      moved = false;
     function down(x, y) {
       dragging = true;
-      px = x;
-      py = y;
-      ty = y;
+      downX = lastX = x;
+      downY = y;
+      moved = false;
     }
-    function move(x, y) {
+    function move(x) {
       if (!dragging) return;
-      tYaw += (x - px) * 0.004;
-      tYaw = Math.max(-0.6, Math.min(0.6, tYaw));
-      px = x;
+      tpos -= (x - lastX) * 0.01;
+      lastX = x;
+      if (Math.abs(x - downX) > 6) moved = true;
     }
-    function end(y) {
+    function up() {
       dragging = false;
     }
     renderer.domElement.addEventListener("mousedown", function (e) {
       down(e.clientX, e.clientY);
     });
     window.addEventListener("mousemove", function (e) {
-      move(e.clientX, e.clientY);
+      move(e.clientX);
+      hoverX = e.clientX;
+      hoverY = e.clientY;
     });
-    window.addEventListener("mouseup", function () {
-      end();
-    });
-    var tStartY = 0;
+    window.addEventListener("mouseup", up);
     renderer.domElement.addEventListener(
       "touchstart",
       function (e) {
         down(e.touches[0].clientX, e.touches[0].clientY);
-        tStartY = e.touches[0].clientY;
       },
       { passive: true },
     );
     renderer.domElement.addEventListener(
       "touchmove",
       function (e) {
-        move(e.touches[0].clientX, e.touches[0].clientY);
-        var dy = e.touches[0].clientY - tStartY;
-        targetZ -= dy * 0.03;
-        targetZ = Math.max(minZ, Math.min(maxZ, targetZ));
-        tStartY = e.touches[0].clientY;
+        move(e.touches[0].clientX);
       },
       { passive: true },
     );
-    window.addEventListener("touchend", function () {
-      end();
+    window.addEventListener("touchend", up);
+
+    document.addEventListener("keydown", function (e) {
+      if (!overlay.classList.contains("open")) return;
+      if (e.key === "Escape") closeGallery3D();
+      else if (e.key === "ArrowRight" || e.key === "ArrowDown") tpos += 1;
+      else if (e.key === "ArrowLeft" || e.key === "ArrowUp") tpos -= 1;
     });
 
-    // click a photo -> open the existing lightbox at that index
+    // ---- hover focus + click to enlarge ----
     var ray = new THREE.Raycaster(),
-      m = new THREE.Vector2(),
-      downX = 0,
-      downY = 0;
-    renderer.domElement.addEventListener("mousedown", function (e) {
-      downX = e.clientX;
-      downY = e.clientY;
-    });
+      ndc = new THREE.Vector2(),
+      hoverX = -1,
+      hoverY = -1,
+      hovered = -1;
+    function pick(cx, cy) {
+      ndc.x = (cx / window.innerWidth) * 2 - 1;
+      ndc.y = -(cy / window.innerHeight) * 2 + 1;
+      ray.setFromCamera(ndc, camera);
+      var hit = ray.intersectObjects(photos)[0];
+      return hit ? hit.object : null;
+    }
     renderer.domElement.addEventListener("click", function (e) {
-      if (Math.abs(e.clientX - downX) > 6 || Math.abs(e.clientY - downY) > 6)
-        return;
-      m.x = (e.clientX / window.innerWidth) * 2 - 1;
-      m.y = -(e.clientY / window.innerHeight) * 2 + 1;
-      ray.setFromCamera(m, camera);
-      var hit = ray.intersectObjects(planes)[0];
-      if (hit) {
-        var idx = hit.object.userData.index;
+      if (moved) return;
+      var o = pick(e.clientX, e.clientY);
+      if (o) {
+        var idx = o.userData.index;
         closeGallery3D();
         var figs = document.querySelectorAll("#work-grid .gallery-item");
         if (figs[idx])
@@ -443,74 +346,56 @@
     overlay
       .querySelector(".g3d-exit")
       .addEventListener("click", closeGallery3D);
-    document.addEventListener("keydown", function (e) {
-      if (!overlay.classList.contains("open")) return;
-      if (e.key === "Escape") closeGallery3D();
-      else if (e.key === "ArrowDown" || e.key === "ArrowRight")
-        targetZ = Math.max(minZ, targetZ - SP);
-      else if (e.key === "ArrowUp" || e.key === "ArrowLeft")
-        targetZ = Math.min(maxZ, targetZ + SP);
-    });
 
     function loop() {
       requestAnimationFrame(loop);
-      if (!reduce) targetZ -= 0.004; // gentle forward drift
-      if (targetZ < minZ) targetZ = maxZ; // loop the corridor
-      camera.position.z += (targetZ - camera.position.z) * 0.06;
-      yaw += (tYaw - yaw) * 0.07;
-      camera.rotation.y = yaw;
+      pos += (tpos - pos) * 0.08; // smooth glide
+      setCam();
+      // hover focus
+      var o = hoverX >= 0 ? pick(hoverX, hoverY) : null;
+      hovered = o ? o.userData.index : -1;
+      renderer.domElement.style.cursor = o ? "pointer" : "grab";
+      photos.forEach(function (ph) {
+        ph.userData.target = ph.userData.index === hovered ? 1.06 : 1;
+        ph.userData.mult += (ph.userData.target - ph.userData.mult) * 0.12;
+        ph.scale.set(
+          ph.userData.w * ph.userData.mult,
+          ph.userData.h * ph.userData.mult,
+          1,
+        );
+      });
       renderer.render(scene, camera);
     }
     loop();
 
-    g3dState = { overlay: overlay };
-    g3dBuilt = true;
+    state = { overlay: overlay };
+    built = true;
   }
 
   function openGallery3D() {
     var items = window.CJ_WORK_CURRENT || window.CJ_WORK_ALL || [];
     if (!items.length) return;
-    if (!g3dBuilt) {
+    if (!built) {
       loadThree()
         .then(function (THREE) {
           buildGallery3D(THREE, items);
           requestAnimationFrame(function () {
-            g3dState.overlay.classList.add("open");
+            state.overlay.classList.add("open");
             document.body.style.overflow = "hidden";
           });
         })
         .catch(function () {});
     } else {
-      g3dState.overlay.classList.add("open");
+      state.overlay.classList.add("open");
       document.body.style.overflow = "hidden";
     }
   }
   function closeGallery3D() {
-    if (g3dState) g3dState.overlay.classList.remove("open");
+    if (state) state.overlay.classList.remove("open");
     document.body.style.overflow = "";
   }
 
-  /* ----------------------------------------------------------- wiring */
   document.addEventListener("DOMContentLoaded", function () {
-    var cam = document.getElementById("cam3d");
-    if (cam) {
-      if ("IntersectionObserver" in window) {
-        var io = new IntersectionObserver(
-          function (en) {
-            en.forEach(function (e) {
-              if (e.isIntersecting) {
-                io.disconnect();
-                initCamera3D(cam);
-              }
-            });
-          },
-          { threshold: 0.2 },
-        );
-        io.observe(cam);
-      } else {
-        initCamera3D(cam);
-      }
-    }
     var btn = document.getElementById("gallery3d-open");
     if (btn) btn.addEventListener("click", openGallery3D);
   });

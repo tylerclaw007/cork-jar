@@ -1292,3 +1292,29 @@ body.vf-grid-on .vf-grid {
     bottom: 4.5rem;
   }
 }
+
+/* 3D gallery overrides: bright museum look (light overlay + dark UI text) */
+.gallery3d {
+  background: #e9e7e2;
+}
+.gallery3d::after {
+  /* soft vignette for subtle depth */
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(circle at 50% 48%, transparent 58%, rgba(0, 0, 0, 0.16) 100%);
+}
+.g3d-exit {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  color: #1c1d20;
+  backdrop-filter: blur(8px);
+}
+.g3d-exit:hover {
+  background: #fff;
+}
+.g3d-hint {
+  color: rgba(20, 20, 20, 0.55);
+}
