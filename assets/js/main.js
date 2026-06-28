@@ -943,7 +943,9 @@ window.CJ = {
     slides.forEach(function (s, i) {
       s.classList.toggle("active", i === index);
     });
-    var slideW = slides[0].getBoundingClientRect().width;
+    // use layout width (offsetWidth), NOT getBoundingClientRect, so the
+    // active slide's scale transform does not throw off the centering.
+    var slideW = slides[0].offsetWidth;
     var gap = window.innerWidth * 0.025; // matches 2.5vw gap in CSS
     var x = window.innerWidth / 2 - (index * (slideW + gap) + slideW / 2);
     track.style.transform = "translateX(" + x + "px)";

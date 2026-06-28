@@ -1318,3 +1318,23 @@ body.vf-grid-on .vf-grid {
 .g3d-hint {
   color: rgba(20, 20, 20, 0.55);
 }
+
+/* camera reel: never select/drag-highlight text or images while spinning */
+.camera-reel,
+.camera-reel * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+.camera-reel img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+/* make sure the active photo shows in full, uncropped and unblurred */
+.cr-slide img {
+  object-fit: contain;
+}
+.cr-slide.active {
+  filter: none !important;
+  opacity: 1 !important;
+}
