@@ -4,14 +4,15 @@
    system, custom components, and motion. */
 
 :root {
-  --paper: #0c0d10;
-  --paper-2: #16181d;
-  --ink: #f3f4f6;
-  --ink-2: #c4c7cd;
-  --muted: #82868f;
-  --line: rgba(255, 255, 255, 0.12);
-  --accent: #8fb0c9; /* cool ice-blue, used sparingly */
-  --night: #0b0b0c;
+  --paper: #2c3037; /* mid-slate base: not black, not white */
+  --paper-2: #23262c; /* slightly deeper, for wells + cards */
+  --ink: #f1f1ec;
+  --ink-2: #c3c4c1;
+  --muted: #8d8f8d;
+  --line: rgba(255, 255, 255, 0.13);
+  --accent: #d6a35c; /* warm amber, from the grade */
+  --accent-2: #5aa6b0; /* teal, the other half of the grade */
+  --night: #1d2025;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -22,19 +23,65 @@
 
 html {
   scroll-behavior: smooth;
+  background: var(--paper);
 }
 
 body {
-  background: var(--paper);
+  background: transparent;
   color: var(--ink);
   font-family: "Inter", system-ui, sans-serif;
   letter-spacing: -0.01em;
 }
 
+/* living color-grade wash: teal + amber over the mid-slate base,
+   hue-shifting as you scroll so the whole site behaves like a grade. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 18% 12%,
+      rgba(90, 166, 176, 0.22),
+      transparent 46%
+    ),
+    radial-gradient(
+      circle at 86% 84%,
+      rgba(214, 163, 92, 0.18),
+      transparent 52%
+    ),
+    radial-gradient(
+      circle at 60% 50%,
+      rgba(120, 110, 150, 0.1),
+      transparent 60%
+    );
+}
+@supports (animation-timeline: scroll()) {
+  body::before {
+    animation: grade-shift linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes grade-shift {
+  from {
+    filter: hue-rotate(0deg) saturate(1);
+  }
+  to {
+    filter: hue-rotate(48deg) saturate(1.25);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+}
+
 /* ----------------------------------------------------------------- type */
 
 .font-display {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
   font-optical-sizing: auto;
 }
 
@@ -47,7 +94,7 @@ body {
 }
 
 .display-xl {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
   font-weight: 500;
   line-height: 0.95;
   letter-spacing: -0.03em;
@@ -55,7 +102,7 @@ body {
 }
 
 .display-lg {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
   font-weight: 500;
   line-height: 1;
   letter-spacing: -0.025em;
@@ -63,7 +110,7 @@ body {
 }
 
 .display-md {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
   font-weight: 500;
   line-height: 1.05;
   letter-spacing: -0.02em;
@@ -210,7 +257,7 @@ body {
   transform: none;
 }
 .menu-overlay a {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
   font-weight: 500;
   font-size: clamp(2.2rem, 9vw, 3.5rem);
   line-height: 1.25;
@@ -288,7 +335,7 @@ body {
   transform: none;
 }
 .cap-title {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
   font-weight: 400;
   font-size: 1.05rem;
 }
@@ -525,7 +572,7 @@ body {
   animation: cj-marquee 32s linear infinite;
 }
 .marquee span {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
   font-weight: 500;
   font-size: clamp(1.5rem, 3vw, 2.5rem);
   color: var(--ink-2);
@@ -661,7 +708,7 @@ html.leaving body {
   pointer-events: none;
 }
 .loader .mark {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
   font-weight: 500;
   font-size: clamp(2rem, 6vw, 3.5rem);
   letter-spacing: -0.02em;
@@ -857,7 +904,7 @@ html.leaving body {
   pointer-events: none;
 }
 .cr-title .t {
-  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
   font-weight: 500;
   font-size: clamp(1.1rem, 2.2vw, 1.6rem);
 }
@@ -924,4 +971,256 @@ html.leaving body {
    transformation even though both sides share the same frame. */
 .ba .ba-before {
   filter: saturate(0.45) contrast(0.9) brightness(1.12);
+}
+
+/* ===================================================== camera viewfinder HUD
+   A subtle overlay that makes the whole site feel like a camera viewfinder:
+   corner brackets, a thirds grid, a focus reticle, and live read-outs.
+   pointer-events: none so it never blocks interaction. */
+.viewfinder {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+body.vf-off .viewfinder {
+  display: none;
+}
+.vf-bracket {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+}
+.vf-bracket.tl { top: 16px; left: 16px; border-right: 0; border-bottom: 0; }
+.vf-bracket.tr { top: 16px; right: 16px; border-left: 0; border-bottom: 0; }
+.vf-bracket.bl { bottom: 16px; left: 16px; border-right: 0; border-top: 0; }
+.vf-bracket.br { bottom: 16px; right: 16px; border-left: 0; border-top: 0; }
+.vf-grid {
+  position: absolute;
+  inset: 16px;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 33.33% 33.33%;
+  background-position: 0 0;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+}
+body.vf-grid-on .vf-grid {
+  opacity: 1;
+}
+.vf-reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46px;
+  height: 46px;
+  transform: translate(-50%, -50%);
+  opacity: 0.4;
+}
+.vf-reticle::before,
+.vf-reticle::after {
+  content: "";
+  position: absolute;
+  background: rgba(255, 255, 255, 0.6);
+}
+.vf-reticle::before { top: 50%; left: 0; right: 0; height: 1px; }
+.vf-reticle::after { left: 50%; top: 0; bottom: 0; width: 1px; }
+.vf-readout {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.vf-tl { top: 22px; left: 56px; }
+.vf-tr { top: 22px; right: 56px; }
+.vf-bl { bottom: 22px; left: 56px; }
+.vf-br { bottom: 22px; right: 56px; }
+.vf-rec {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e0341f;
+  animation: cr-pulse 1.6s ease infinite;
+}
+.vf-batt {
+  display: inline-flex;
+  align-items: center;
+  width: 22px;
+  height: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 2px;
+  position: relative;
+  padding: 1.5px;
+}
+.vf-batt::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  top: 3px;
+  width: 2px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+}
+.vf-batt span {
+  display: block;
+  height: 100%;
+  width: 72%;
+  background: var(--accent);
+}
+.vf-toggle {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 46;
+  pointer-events: auto;
+  background: rgba(20, 22, 26, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+}
+.vf-toggle:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+@media (max-width: 640px) {
+  .vf-tl, .vf-bl { left: 44px; }
+  .vf-tr, .vf-br { right: 44px; }
+  .vf-readout { font-size: 0.54rem; }
+}
+
+/* ----------------------------------------------------- shutter transition */
+.shutter {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  pointer-events: none;
+}
+.shutter .blade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 51%;
+  background: #15171b;
+  transition: transform 0.18s cubic-bezier(0.7, 0, 0.84, 0);
+}
+.shutter .blade.top {
+  top: 0;
+  transform: translateY(-101%);
+}
+.shutter .blade.bottom {
+  bottom: 0;
+  transform: translateY(101%);
+}
+.shutter.closing .blade.top,
+.shutter.closing .blade.bottom {
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .shutter .blade {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------- 3D experience canvases */
+.three-stage {
+  position: relative;
+  width: 100%;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(90, 166, 176, 0.12), transparent 60%),
+    var(--paper-2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  cursor: grab;
+}
+.three-stage:active {
+  cursor: grabbing;
+}
+.three-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.three-hint {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.three-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* fullscreen 3D gallery */
+.gallery3d {
+  position: fixed;
+  inset: 0;
+  z-index: 96;
+  background: #0e0f12;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease);
+}
+.gallery3d.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.gallery3d canvas {
+  display: block;
+}
+.g3d-exit {
+  position: absolute;
+  top: clamp(1rem, 4vw, 2.5rem);
+  right: clamp(1rem, 4vw, 2.5rem);
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.g3d-exit:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.g3d-hint {
+  position: absolute;
+  bottom: clamp(1rem, 4vw, 2rem);
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  pointer-events: none;
 }

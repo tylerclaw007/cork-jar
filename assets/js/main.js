@@ -274,9 +274,10 @@ window.CJ = {
         return;
       e.preventDefault();
       document.documentElement.classList.add("leaving");
+      if (window.CJ_shutterClose) window.CJ_shutterClose();
       setTimeout(function () {
         window.location.href = url.href;
-      }, 120);
+      }, 190);
     });
     window.addEventListener("pageshow", function (ev) {
       if (ev.persisted) document.documentElement.classList.remove("leaving");
@@ -978,5 +979,84 @@ window.CJ = {
       trigger.addEventListener("click", function () {
         open(0);
       });
+  });
+})();
+
+/* =====================================================================
+   Viewfinder HUD + shutter transition. Self-contained, additive.
+   Makes the whole site feel like looking through a camera.
+   ===================================================================== */
+(function () {
+  "use strict";
+  var reduce =
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---- shutter ----
+  function buildShutter() {
+    var s = document.createElement("div");
+    s.className = "shutter";
+    s.innerHTML = '<div class="blade top"></div><div class="blade bottom"></div>';
+    document.body.appendChild(s);
+    window.CJ_shutterClose = function () {
+      s.classList.add("closing");
+    };
+    // if returning via bfcache, make sure blades are open
+    window.addEventListener("pageshow", function () {
+      s.classList.remove("closing");
+    });
+  }
+
+  // ---- viewfinder HUD ----
+  var EXIF = [
+    { f: "f/2.8", s: "1/500", iso: "ISO 400", mm: "35mm" },
+    { f: "f/1.8", s: "1/1000", iso: "ISO 200", mm: "50mm" },
+    { f: "f/4.0", s: "1/250", iso: "ISO 640", mm: "24mm" },
+    { f: "f/2.0", s: "1/2000", iso: "ISO 100", mm: "85mm" },
+  ];
+  function buildHUD() {
+    var vf = document.createElement("div");
+    vf.className = "viewfinder";
+    vf.setAttribute("aria-hidden", "true");
+    vf.innerHTML =
+      '<span class="vf-bracket tl"></span><span class="vf-bracket tr"></span>' +
+      '<span class="vf-bracket bl"></span><span class="vf-bracket br"></span>' +
+      '<div class="vf-grid"></div><div class="vf-reticle"></div>' +
+      '<div class="vf-readout vf-tl"><span class="vf-rec"></span><span>REC</span><span class="vf-exif-mode">M</span></div>' +
+      '<div class="vf-readout vf-tr"><span class="vf-exif-1">f/2.8</span><span class="vf-exif-2">1/500</span><span class="vf-batt"><span></span></span></div>' +
+      '<div class="vf-readout vf-bl"><span class="vf-exif-3">ISO 400</span><span class="vf-exif-4">35mm</span></div>' +
+      '<div class="vf-readout vf-br"><span>Cork Jar</span></div>';
+    document.body.appendChild(vf);
+    document.body.classList.add("vf-grid-on");
+
+    var toggle = document.createElement("button");
+    toggle.className = "vf-toggle";
+    toggle.type = "button";
+    toggle.textContent = "HUD on";
+    toggle.addEventListener("click", function () {
+      var off = document.body.classList.toggle("vf-off");
+      toggle.textContent = off ? "HUD off" : "HUD on";
+    });
+    document.body.appendChild(toggle);
+
+    // cycle the read-outs so it feels alive
+    var i = 0;
+    function tick() {
+      i = (i + 1) % EXIF.length;
+      var e = EXIF[i];
+      var q = function (c) {
+        return vf.querySelector(c);
+      };
+      q(".vf-exif-1").textContent = e.f;
+      q(".vf-exif-2").textContent = e.s;
+      q(".vf-exif-3").textContent = e.iso;
+      q(".vf-exif-4").textContent = e.mm;
+    }
+    setInterval(tick, 3200);
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    buildShutter();
+    buildHUD();
   });
 })();

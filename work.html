@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,7 +36,7 @@
               night: "#0a0a0c",
             },
             fontFamily: {
-              display: ["Space Grotesk", "Inter", "sans-serif"],
+              display: ["Bricolage Grotesque", "Inter", "sans-serif"],
               sans: ["Inter", "sans-serif"],
             },
           },
@@ -78,9 +78,14 @@
               Architecture & Still
             </button>
           </div>
-          <button id="camera-open" class="cr-trigger" type="button">
-            <span class="dot-live"></span> Camera mode
-          </button>
+          <div class="flex flex-wrap gap-3">
+            <button id="camera-open" class="cr-trigger" type="button">
+              <span class="dot-live"></span> Camera mode
+            </button>
+            <button id="gallery3d-open" class="cr-trigger" type="button">
+              <span class="dot-live"></span> 3D gallery
+            </button>
+          </div>
         </div>
       </section>
 
@@ -102,5 +107,6 @@
     <div id="site-footer"></div>
     <script src="assets/js/gallery-data.js"></script>
     <script src="assets/js/main.js"></script>
+    <script src="assets/js/three-experiences.js"></script>
   </body>
 </html>
