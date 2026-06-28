@@ -1,8 +1,7 @@
 /* Cork Jar: 3D experiences (Three.js, lazy-loaded from CDN)
    - initCamera3D(): an interactive stylized camera on the Gear page
-   - 3D gallery: a walk-in ring of the real photos on the Work page
-   Both use a tiny custom drag-orbit so no extra control libs are needed.
-   Everything is additive and degrades gracefully if WebGL/CDN is missing. */
+   - 3D gallery: a walk-through corridor of the real photos on the Work page
+   Custom lightweight controls, no extra libs. Degrades gracefully. */
 
 (function () {
   "use strict";
@@ -19,6 +18,22 @@
       _three = m;
       return m;
     });
+  }
+
+  function gradientTexture(THREE, stops) {
+    var c = document.createElement("canvas");
+    c.width = 16;
+    c.height = 256;
+    var ctx = c.getContext("2d");
+    var g = ctx.createLinearGradient(0, 0, 0, 256);
+    stops.forEach(function (s) {
+      g.addColorStop(s[0], s[1]);
+    });
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 16, 256);
+    var t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
   }
 
   /* ----------------------------------------------- stylized 3D camera */
@@ -46,14 +61,12 @@
     var hump = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.34, 0.5), darkMat);
     hump.position.set(-0.45, 0.95, 0);
     g.add(hump);
-    // hot shoe
     var shoe = new THREE.Mesh(
       new THREE.BoxGeometry(0.28, 0.08, 0.3),
       metal(0x33363c, 0.5, 0.5),
     );
     shoe.position.set(-0.45, 1.16, 0);
     g.add(shoe);
-    // shutter button + mode dial
     var shutter = new THREE.Mesh(
       new THREE.CylinderGeometry(0.1, 0.1, 0.08, 24),
       amberMat,
@@ -67,7 +80,6 @@
     dial.position.set(0.3, 0.9, -0.18);
     g.add(dial);
 
-    // lens barrel (front +z)
     var lens = new THREE.Group();
     var barrel = new THREE.Mesh(
       new THREE.CylinderGeometry(0.52, 0.56, 0.95, 56),
@@ -117,36 +129,36 @@
         var w = container.clientWidth,
           h = container.clientHeight;
         var scene = new THREE.Scene();
+        scene.background = gradientTexture(THREE, [
+          [0, "#1b3a42"],
+          [0.55, "#23262c"],
+          [1, "#3a2a1e"],
+        ]);
         var camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 100);
         camera.position.set(0, 0.4, 6.4);
-        var renderer = new THREE.WebGLRenderer({
-          antialias: true,
-          alpha: true,
-        });
+        var renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
         renderer.setSize(w, h);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
         container.appendChild(renderer.domElement);
 
-        scene.add(new THREE.AmbientLight(0x4a4f58, 0.7));
-        var key = new THREE.DirectionalLight(0xffffff, 1.15);
+        scene.add(new THREE.AmbientLight(0x4a4f58, 0.8));
+        var key = new THREE.DirectionalLight(0xffffff, 1.2);
         key.position.set(3, 5, 4);
         scene.add(key);
-        var rim = new THREE.DirectionalLight(0x5aa6b0, 0.9);
+        var rim = new THREE.DirectionalLight(0x5aa6b0, 1.0);
         rim.position.set(-4, 2, -3);
         scene.add(rim);
-        var fill = new THREE.PointLight(0xd6a35c, 0.5, 30);
+        var fill = new THREE.PointLight(0xd6a35c, 0.6, 30);
         fill.position.set(2, -2, 3);
         scene.add(fill);
 
         var cam = buildCamera(THREE);
         scene.add(cam);
 
-        // custom drag-orbit + inertia + idle auto-rotate
         var dragging = false,
           px = 0,
           py = 0,
-          vy = 0,
-          vx = 0,
           tY = cam.rotation.y,
           tX = cam.rotation.x,
           idle = 0;
@@ -158,10 +170,8 @@
         }
         function move(x, y) {
           if (!dragging) return;
-          vy = (x - px) * 0.01;
-          vx = (y - py) * 0.01;
-          tY += vy;
-          tX += vx;
+          tY += (x - px) * 0.01;
+          tX += (y - py) * 0.01;
           tX = Math.max(-0.8, Math.min(0.8, tX));
           px = x;
           py = y;
@@ -193,19 +203,18 @@
         );
         window.addEventListener("touchend", up);
 
-        function resize() {
+        window.addEventListener("resize", function () {
           var W = container.clientWidth,
             H = container.clientHeight;
           camera.aspect = W / H;
           camera.updateProjectionMatrix();
           renderer.setSize(W, H);
-        }
-        window.addEventListener("resize", resize);
+        });
 
         function loop() {
           requestAnimationFrame(loop);
           idle++;
-          if (!dragging && idle > 90 && !reduce) tY += 0.0035; // gentle auto-spin
+          if (!dragging && idle > 90 && !reduce) tY += 0.0035;
           cam.rotation.y += (tY - cam.rotation.y) * 0.08;
           cam.rotation.x += (tX - cam.rotation.x) * 0.08;
           renderer.render(scene, camera);
@@ -218,7 +227,7 @@
       });
   }
 
-  /* --------------------------------------------- walk-in 3D photo gallery */
+  /* ------------------------------------- walk-through 3D photo gallery */
   var g3dBuilt = false,
     g3dState = null;
   function buildGallery3D(THREE, items) {
@@ -226,117 +235,190 @@
     overlay.className = "gallery3d";
     overlay.innerHTML =
       '<button class="g3d-exit" type="button">Exit</button>' +
-      '<div class="g3d-hint">Drag to look around  &middot;  scroll to turn  &middot;  click a photo to enlarge  &middot;  Esc to exit</div>';
+      '<div class="g3d-hint">Scroll to walk forward  &middot;  drag to look  &middot;  click a photo to enlarge  &middot;  Esc to exit</div>';
     document.body.appendChild(overlay);
 
     var scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x0e0f12, 6, 18);
+    scene.background = gradientTexture(THREE, [
+      [0, "#16323a"],
+      [0.5, "#262a30"],
+      [1, "#3a2a1e"],
+    ]);
+    scene.fog = new THREE.FogExp2(0x20242a, 0.018);
+
     var camera = new THREE.PerspectiveCamera(
-      70,
+      68,
       window.innerWidth / window.innerHeight,
       0.1,
-      100,
+      200,
     );
-    camera.position.set(0, 0, 0.1);
     var renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     overlay.insertBefore(renderer.domElement, overlay.firstChild);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 1));
-
+    var maxAniso = renderer.capabilities.getMaxAnisotropy();
     var loader = new THREE.TextureLoader();
-    var R = 7;
+    var SP = 6.2; // spacing along the corridor
+    var XW = 4.3; // wall offset
     var planes = [];
     var n = items.length;
+
     items.forEach(function (it, i) {
-      var a = (i / n) * Math.PI * 2;
+      var left = i % 2 === 0;
+      var x = left ? -XW : XW;
+      var z = -i * SP;
       var tex = loader.load(it.src, function (t) {
+        t.anisotropy = maxAniso;
         var ar = t.image.width / t.image.height;
-        var hh = 3.2,
+        var hh = 3.4,
           ww = hh * ar;
         mesh.scale.set(ww, hh, 1);
-        frame.scale.set(ww + 0.18, hh + 0.18, 1);
+        frame.scale.set(ww + 0.22, hh + 0.22, 1);
       });
       tex.colorSpace = THREE.SRGBColorSpace;
       var frame = new THREE.Mesh(
         new THREE.PlaneGeometry(1, 1),
-        new THREE.MeshBasicMaterial({ color: 0x050607 }),
+        new THREE.MeshBasicMaterial({ color: 0x07080a }),
       );
       var mesh = new THREE.Mesh(
         new THREE.PlaneGeometry(1, 1),
-        new THREE.MeshBasicMaterial({ map: tex }),
+        new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }),
       );
-      var x = Math.sin(a) * R,
-        z = -Math.cos(a) * R;
+      var ry = left ? Math.PI / 2 - 0.32 : -Math.PI / 2 + 0.32;
       frame.position.set(x, 0, z);
-      mesh.position.set(x, 0, z - 0.01);
-      frame.lookAt(0, 0, 0);
-      mesh.lookAt(0, 0, 0);
+      mesh.position.set(x + (left ? 0.02 : -0.02), 0, z);
+      frame.rotation.y = ry;
+      mesh.rotation.y = ry;
       mesh.userData.index = i;
       scene.add(frame);
       scene.add(mesh);
       planes.push(mesh);
+
+      // little spotlight glow above each frame for gallery ambiance
+      var glow = new THREE.Mesh(
+        new THREE.CircleGeometry(0.5, 24),
+        new THREE.MeshBasicMaterial({
+          color: left ? 0x5aa6b0 : 0xd6a35c,
+          transparent: true,
+          opacity: 0.16,
+        }),
+      );
+      glow.position.set(x, 2.5, z);
+      glow.rotation.x = -Math.PI / 2.2;
+      scene.add(glow);
     });
 
-    // floor + ceiling hint
-    var floorMat = new THREE.MeshBasicMaterial({ color: 0x141519 });
-    var floor = new THREE.Mesh(new THREE.CircleGeometry(R + 4, 48), floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -2.4;
-    scene.add(floor);
+    var corridorLen = (n - 1) * SP;
 
-    var yaw = 0,
-      tYaw = 0,
-      dragging = false,
-      px = 0;
-    function down(x) {
+    // floor + ceiling + accent runners for depth
+    var floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(40, corridorLen + 40),
+      new THREE.MeshBasicMaterial({ color: 0x14161a }),
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(0, -2.6, -corridorLen / 2);
+    scene.add(floor);
+    var ceil = new THREE.Mesh(
+      new THREE.PlaneGeometry(40, corridorLen + 40),
+      new THREE.MeshBasicMaterial({ color: 0x1b1e23 }),
+    );
+    ceil.rotation.x = Math.PI / 2;
+    ceil.position.set(0, 3.4, -corridorLen / 2);
+    scene.add(ceil);
+    [-XW - 0.4, XW + 0.4].forEach(function (rx, k) {
+      var runner = new THREE.Mesh(
+        new THREE.BoxGeometry(0.06, 0.06, corridorLen + 30),
+        new THREE.MeshBasicMaterial({ color: k === 0 ? 0x5aa6b0 : 0xd6a35c }),
+      );
+      runner.position.set(rx, -2.55, -corridorLen / 2);
+      scene.add(runner);
+    });
+
+    var START_Z = 5;
+    camera.position.set(0, 0, START_Z);
+    var targetZ = START_Z,
+      yaw = 0,
+      tYaw = 0;
+    var minZ = -corridorLen - 4,
+      maxZ = START_Z;
+
+    // wheel / swipe = walk forward and back
+    overlay.addEventListener(
+      "wheel",
+      function (e) {
+        e.preventDefault();
+        targetZ -= e.deltaY * 0.02;
+        targetZ = Math.max(minZ, Math.min(maxZ, targetZ));
+      },
+      { passive: false },
+    );
+
+    var dragging = false,
+      px = 0,
+      py = 0,
+      ty = 0;
+    function down(x, y) {
       dragging = true;
       px = x;
+      py = y;
+      ty = y;
     }
-    function move(x) {
+    function move(x, y) {
       if (!dragging) return;
-      tYaw += (x - px) * 0.005;
+      tYaw += (x - px) * 0.004;
+      tYaw = Math.max(-0.6, Math.min(0.6, tYaw));
       px = x;
     }
-    function up() {
+    function end(y) {
       dragging = false;
     }
     renderer.domElement.addEventListener("mousedown", function (e) {
-      down(e.clientX);
+      down(e.clientX, e.clientY);
     });
     window.addEventListener("mousemove", function (e) {
-      move(e.clientX);
+      move(e.clientX, e.clientY);
     });
-    window.addEventListener("mouseup", up);
+    window.addEventListener("mouseup", function () {
+      end();
+    });
+    var tStartY = 0;
     renderer.domElement.addEventListener(
       "touchstart",
       function (e) {
-        down(e.touches[0].clientX);
+        down(e.touches[0].clientX, e.touches[0].clientY);
+        tStartY = e.touches[0].clientY;
       },
       { passive: true },
     );
     renderer.domElement.addEventListener(
       "touchmove",
       function (e) {
-        move(e.touches[0].clientX);
+        move(e.touches[0].clientX, e.touches[0].clientY);
+        var dy = e.touches[0].clientY - tStartY;
+        targetZ -= dy * 0.03;
+        targetZ = Math.max(minZ, Math.min(maxZ, targetZ));
+        tStartY = e.touches[0].clientY;
       },
       { passive: true },
     );
-    window.addEventListener("touchend", up);
-    overlay.addEventListener(
-      "wheel",
-      function (e) {
-        e.preventDefault();
-        tYaw += (e.deltaY || e.deltaX) * 0.0015;
-      },
-      { passive: false },
-    );
+    window.addEventListener("touchend", function () {
+      end();
+    });
 
     // click a photo -> open the existing lightbox at that index
     var ray = new THREE.Raycaster(),
-      m = new THREE.Vector2();
+      m = new THREE.Vector2(),
+      downX = 0,
+      downY = 0;
+    renderer.domElement.addEventListener("mousedown", function (e) {
+      downX = e.clientX;
+      downY = e.clientY;
+    });
     renderer.domElement.addEventListener("click", function (e) {
+      if (Math.abs(e.clientX - downX) > 6 || Math.abs(e.clientY - downY) > 6)
+        return;
       m.x = (e.clientX / window.innerWidth) * 2 - 1;
       m.y = -(e.clientY / window.innerHeight) * 2 + 1;
       ray.setFromCamera(m, camera);
@@ -348,30 +430,33 @@
         if (figs[idx])
           setTimeout(function () {
             figs[idx].click();
-          }, 260);
+          }, 280);
       }
     });
 
-    function onResize() {
+    window.addEventListener("resize", function () {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-    window.addEventListener("resize", onResize);
+    });
 
     overlay
       .querySelector(".g3d-exit")
       .addEventListener("click", closeGallery3D);
     document.addEventListener("keydown", function (e) {
-      if (overlay.classList.contains("open") && e.key === "Escape")
-        closeGallery3D();
+      if (!overlay.classList.contains("open")) return;
+      if (e.key === "Escape") closeGallery3D();
+      else if (e.key === "ArrowDown" || e.key === "ArrowRight")
+        targetZ = Math.max(minZ, targetZ - SP);
+      else if (e.key === "ArrowUp" || e.key === "ArrowLeft")
+        targetZ = Math.min(maxZ, targetZ + SP);
     });
 
-    var running = true;
     function loop() {
-      if (!running) return;
       requestAnimationFrame(loop);
-      if (!dragging && !reduce) tYaw += 0.0008;
+      if (!reduce) targetZ -= 0.004; // gentle forward drift
+      if (targetZ < minZ) targetZ = maxZ; // loop the corridor
+      camera.position.z += (targetZ - camera.position.z) * 0.06;
       yaw += (tYaw - yaw) * 0.07;
       camera.rotation.y = yaw;
       renderer.render(scene, camera);

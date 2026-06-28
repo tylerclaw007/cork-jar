@@ -1224,3 +1224,71 @@ body.vf-grid-on .vf-grid {
   text-transform: uppercase;
   pointer-events: none;
 }
+
+/* camera reel quick-control dial (bottom-right, spin to change photo) */
+.cr-quickdial {
+  position: absolute;
+  right: clamp(1rem, 4vw, 2.6rem);
+  bottom: clamp(3.5rem, 9vw, 5rem);
+  width: clamp(92px, 13vw, 128px);
+  height: clamp(92px, 13vw, 128px);
+  border-radius: 50%;
+  z-index: 4;
+  cursor: grab;
+  touch-action: none;
+  background:
+    radial-gradient(circle at 50% 40%, #2a2e34, #14161a 72%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.5),
+    0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.cr-quickdial:active,
+.cr-quickdial.spinning {
+  cursor: grabbing;
+}
+.cr-qd-rotor {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  /* tick marks around the rim */
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      rgba(255, 255, 255, 0.22) 0deg 1.6deg,
+      transparent 1.6deg 15deg
+    );
+  -webkit-mask: radial-gradient(circle, transparent 60%, #000 61%, #000 72%, transparent 73%);
+  mask: radial-gradient(circle, transparent 60%, #000 61%, #000 72%, transparent 73%);
+  transition: transform 0.05s linear;
+}
+.cr-qd-notch {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 5px;
+  height: 14px;
+  margin-left: -2.5px;
+  border-radius: 3px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.cr-qd-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 0.52rem;
+  line-height: 1.25;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+@media (max-width: 640px) {
+  .cr-quickdial {
+    right: 1rem;
+    bottom: 4.5rem;
+  }
+}

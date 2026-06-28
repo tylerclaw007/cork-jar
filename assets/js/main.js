@@ -812,7 +812,11 @@ window.CJ = {
       '<div class="cr-rec"><span class="dot-live"></span> Playback</div>' +
       '<div class="cr-stage"><div class="cr-track"></div></div>' +
       '<div class="cr-title"><span class="t"></span></div>' +
-      '<div class="cr-hint">Scroll or swipe to browse  &middot;  click photo to enlarge  &middot;  Esc to exit</div>' +
+      '<div class="cr-hint">Spin the dial, scroll or swipe to browse  &middot;  click photo to enlarge  &middot;  Esc to exit</div>' +
+      '<div class="cr-quickdial" id="cr-quickdial" title="Spin to change photo">' +
+      '<div class="cr-qd-rotor"><span class="cr-qd-notch"></span></div>' +
+      '<div class="cr-qd-center">Quick<br>Control</div>' +
+      "</div>" +
       '<button class="cr-exit" aria-label="Close camera mode">Exit</button>';
     document.body.appendChild(reel);
     track = reel.querySelector(".cr-track");
@@ -821,6 +825,7 @@ window.CJ = {
     titleEl = reel.querySelector(".cr-title .t");
 
     reel.querySelector(".cr-exit").addEventListener("click", close);
+    wireDial(reel.querySelector("#cr-quickdial"));
     reel.addEventListener("wheel", onWheel, { passive: false });
     reel.addEventListener("touchstart", onTouchStart, { passive: true });
     reel.addEventListener("touchmove", onTouchMove, { passive: false });
@@ -835,6 +840,63 @@ window.CJ = {
       else if (e.key === "ArrowLeft") step(-1);
     });
     built = true;
+  }
+
+  // quick-control dial: spin it (drag in a circle) to step photos,
+  // like the rear dial on a real camera.
+  function wireDial(dial) {
+    if (!dial) return;
+    var rotor = dial.querySelector(".cr-qd-rotor");
+    var angle = 0, // visual rotation
+      accum = 0, // accumulated since last step
+      last = null,
+      active = false;
+    var STEP = 26; // degrees per photo
+    function pt(e) {
+      var t = e.touches ? e.touches[0] : e;
+      var r = dial.getBoundingClientRect();
+      return (
+        Math.atan2(
+          t.clientY - (r.top + r.height / 2),
+          t.clientX - (r.left + r.width / 2),
+        ) *
+        (180 / Math.PI)
+      );
+    }
+    function start(e) {
+      active = true;
+      last = pt(e);
+      dial.classList.add("spinning");
+    }
+    function moveD(e) {
+      if (!active) return;
+      var a = pt(e);
+      var d = a - last;
+      if (d > 180) d -= 360;
+      if (d < -180) d += 360;
+      last = a;
+      angle += d;
+      accum += d;
+      rotor.style.transform = "rotate(" + angle + "deg)";
+      while (accum >= STEP) {
+        step(1);
+        accum -= STEP;
+      }
+      while (accum <= -STEP) {
+        step(-1);
+        accum += STEP;
+      }
+    }
+    function end() {
+      active = false;
+      dial.classList.remove("spinning");
+    }
+    dial.addEventListener("mousedown", start);
+    window.addEventListener("mousemove", moveD);
+    window.addEventListener("mouseup", end);
+    dial.addEventListener("touchstart", start, { passive: true });
+    window.addEventListener("touchmove", moveD, { passive: true });
+    window.addEventListener("touchend", end);
   }
 
   function slidesData() {
@@ -996,7 +1058,8 @@ window.CJ = {
   function buildShutter() {
     var s = document.createElement("div");
     s.className = "shutter";
-    s.innerHTML = '<div class="blade top"></div><div class="blade bottom"></div>';
+    s.innerHTML =
+      '<div class="blade top"></div><div class="blade bottom"></div>';
     document.body.appendChild(s);
     window.CJ_shutterClose = function () {
       s.classList.add("closing");
